@@ -1,0 +1,20 @@
+const UserModel = require('../models/user.models')
+const bcrypt = require('bcrypt')
+
+const createUser = async ({
+    username,email,password
+}) => {
+    if(!username || !email || !password){
+        throw new Error("All fields are Required")
+    }
+
+    const hashedPassword = await bcrypt.hash(password,10);
+
+    const user = await UserModel.create({
+        username,
+        email,
+        password : hashedPassword
+    })
+    return user;
+}
+module.exports = createUser;
