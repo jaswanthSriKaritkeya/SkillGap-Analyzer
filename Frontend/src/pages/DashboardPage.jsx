@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { FileText, UploadCloud, Briefcase, User, Sparkles } from 'lucide-react';
+import { FileText, UploadCloud, Briefcase, User, Sparkles, History, Loader2, CheckCircle2 } from 'lucide-react';
 import api from '../services/api';
 import './Dashboard.scss';
 
@@ -11,6 +11,11 @@ const DashboardPage = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const [isFetchingPrevious, setIsFetchingPrevious] = useState(false);
+  const [showEmptyState, setShowEmptyState] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [toastError, setToastError] = useState('');
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -62,6 +67,29 @@ const DashboardPage = ({ user }) => {
     }
   };
 
+  const handleViewPrevious = async () => {
+    setIsFetchingPrevious(true);
+    setToastError('');
+    setShowEmptyState(false);
+    
+    try {
+      const response = await api.get('/api/interview/get-report');
+      if (response.data && response.data.report) {
+        setShowSuccessAnimation(true);
+        setTimeout(() => {
+          navigate('/report', { state: { report: { interviewReport: response.data.report } } });
+        }, 500);
+      } else {
+        setShowEmptyState(true);
+        setIsFetchingPrevious(false);
+      }
+    } catch (err) {
+      setToastError('Unable to retrieve your previous analysis. Please try again.');
+      setTimeout(() => setToastError(''), 3000);
+      setIsFetchingPrevious(false);
+    }
+  };
+
   return (
     <div className="dashboard-page container">
       <div className="dashboard-header text-center">
@@ -71,7 +99,26 @@ const DashboardPage = ({ user }) => {
 
       {error && <div className="error-message text-center" style={{marginBottom: '1rem'}}>{error}</div>}
 
-      <div className="dashboard-grid">
+      {showEmptyState ? (
+        <div className="card empty-state-card">
+          <div className="empty-state-content">
+            <div className="empty-state-icon-wrapper">
+              <FileText size={48} className="empty-state-icon" />
+            </div>
+            <h2>No Previous Analysis Found</h2>
+            <p>You haven't analyzed a resume yet. Upload your resume to generate your first AI-powered analysis.</p>
+            <button 
+              className="btn-primary mt-4" 
+              onClick={() => setShowEmptyState(false)}
+            >
+              <UploadCloud size={20} className="btn-icon" />
+              Upload Resume
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="dashboard-grid">
         {/* Left Section - Resume Upload */}
         <div className="card dashboard-section">
           <div className="section-header">
@@ -134,12 +181,46 @@ const DashboardPage = ({ user }) => {
         <button 
           className="btn-primary analyze-btn" 
           onClick={handleAnalyze}
-          disabled={!file || !jobDescription.trim() || !selfDescription.trim() || loading}
+          disabled={!file || !jobDescription.trim() || !selfDescription.trim() || loading || isFetchingPrevious}
         >
           <Sparkles size={20} className="btn-icon" />
           {loading ? 'Analyzing...' : 'Analyze Resume'}
         </button>
+
+        <button
+          className={`btn-primary analyze-btn ${showSuccessAnimation ? 'success' : ''}`}
+          onClick={handleViewPrevious}
+          disabled={isFetchingPrevious || loading}
+        >
+          {showSuccessAnimation ? (
+            <>
+              <CheckCircle2 size={20} className="btn-icon" />
+              Analysis Retrieved
+            </>
+          ) : isFetchingPrevious ? (
+            <>
+              <Loader2 size={20} className="btn-icon spinning" />
+              Retrieving Analysis...
+            </>
+          ) : (
+            <>
+              <History size={20} className="btn-icon" />
+              View Previous Analysis
+            </>
+          )}
+        </button>
       </div>
+        </>
+      )}
+
+      {/* Toast Notification */}
+      {toastError && (
+        <div className="toast-container">
+          <div className="toast">
+            {toastError}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
