@@ -3,7 +3,7 @@ const generateInterviewReport = require('../services/ai.service')
 const intervieweReportModel = require('../models/interviewReport.model')
 const UserModel = require('../models/user.models');
 
-const generateReportController = async (req,res) => {
+module.exports.generateReportController = async (req,res) => {
     const resumeFile = req.file;
 
     const extractContent =  async (buffer) =>{
@@ -45,5 +45,10 @@ const generateReportController = async (req,res) => {
     });
 
 }
-
-module.exports = generateReportController
+module.exports.userReportController = async (req,res) => {
+    const id = req.user._id;
+    const report = await intervieweReportModel.findOne({user : id});
+    return res.status(200).json({
+        report
+    })
+}
