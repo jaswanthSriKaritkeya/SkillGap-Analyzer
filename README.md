@@ -27,7 +27,7 @@ This repository contains two main parts:
 - Multer file uploads
 - dotenv for environment variables
 - express-validator for request validation
-- Google GenAI and GROQ SDK integrations
+- Google GenAI
 
 ### Frontend
 - React
