@@ -28,7 +28,7 @@ module.exports.RegisterUser =  async (req,res,next) => {
             message : "Username or email Already exist"
         })
     }
-    const user = await createUser({username,email,password});
+    const user = await createUser({email,password});
     
     const token = await jwt.sign(
         {id : user._id},
