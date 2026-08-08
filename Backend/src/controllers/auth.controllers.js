@@ -30,11 +30,19 @@ module.exports.RegisterUser =  async (req,res,next) => {
     }
     const user = await createUser({username,email,password});
     
-    const token = await jwt.sign(user.id, process.env.JWT_SECRET);
+    const token = await jwt.sign(
+        {id : user._id},
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+    );
 
-    res.cookie("token",token);
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    });
     return  res.status(200).json({
-        user , token
+        user
     })
 }
 
@@ -70,11 +78,19 @@ module.exports.LoginUser = async (req,res) => {
         })
     }
 
-    const token = await jwt.sign(user.id,process.env.JWT_SECRET);
-    res.cookie("token",token);
+    const token = await jwt.sign(
+        {id : user._id},
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+    );
+    res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+    });
 
     return res.status(200).json({
-        user, token
+        user
     });
 }
 
@@ -87,7 +103,14 @@ module.exports.LogoutUser = async (req,res) => {
         })
     }
     await blacklistModel.create({token});
-    res.clearCookie("token");
+
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production"
+            ? "none"
+            : "lax"
+    });
 
     return res.status(200).json({
         "message" : "Logout Successfully"

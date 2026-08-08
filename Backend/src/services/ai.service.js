@@ -146,7 +146,7 @@ The JSON must be directly parsable using JSON.parse().
     
 //    const jsonSchema = zodToJsonSchema(interviewReportSchema);
     const response = await ai.models.generateContent({
-        model : "gemini-3.5-flash",
+        model : process.env.GEMINI_MODEL,
         contents : prompt,
         config : {
             responseMimeType : "application/json",

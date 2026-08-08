@@ -10,17 +10,17 @@ const userAuthMiddleware = async(req,res,next) => {
             message : "Token is empty",
         })
     }
-
-    const isBlackListToken = await blacklistModel.findOne({token})
-    
-    if(isBlackListToken){
-        return res.status(401).json({
-            Message : "Unauthorized User"
-        })
-    }
     try{
+        const isBlackListToken = await blacklistModel.findOne({token})
+        
+        if(isBlackListToken){
+            return res.status(401).json({
+                Message : "Unauthorized User"
+            })
+        }
+    
         const decoded = await jwt.verify(token,process.env.JWT_SECRET);
-        const user = await UserModel.findById(decoded);
+        const user = await UserModel.findById(decoded.id);
         req.user = user;
         next();
 

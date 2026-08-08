@@ -20,7 +20,7 @@ const Navbar = ({ user, setUser }) => {
     <nav className="navbar">
       <div className="container navbar-container">
         <Link to="/" className="navbar-logo">
-          Resume Analyzer
+          SkillLens.io
         </Link>
         <div className="navbar-links">
           <Link to="/" className="nav-link">Home</Link>
