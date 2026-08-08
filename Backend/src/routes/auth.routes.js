@@ -8,7 +8,6 @@ router.post('/register',
     [   
         body('email').isEmail().withMessage("InValid Email"),
         body('password').isLength({min : 8}).withMessage("Password Length is less than 8 characters"),
-        body('username').isLength({min : 6}).withMessage("username is then less than 6 characters"),
     ],
     UserControllers.RegisterUser
 )

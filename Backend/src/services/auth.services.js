@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 const createUser = async ({
     username,email,password
 }) => {
-    if(!username || !email || !password){
+    if(!email || !password){
         throw new Error("All fields are Required")
     }
 
